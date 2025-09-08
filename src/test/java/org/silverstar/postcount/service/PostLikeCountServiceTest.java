@@ -2,12 +2,12 @@ package org.silverstar.postcount.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.silverstar.postcount.support.SetupTemplate;
+import org.silverstar.postcount.support.SetupPostTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.silverstar.postcount.support.ConcurrentTestTemplate.run;
 
-class PostLikeCountServiceTest extends SetupTemplate {
+class PostLikeCountServiceTest extends SetupPostTemplate {
 
     @Autowired
     private PostLikeCountService postLikeCountService;

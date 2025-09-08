@@ -1,9 +1,8 @@
 package org.silverstar.postcount.support;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public final class ConcurrentTestTemplate {
 
@@ -14,11 +13,14 @@ public final class ConcurrentTestTemplate {
         void run() throws Exception;
     }
 
-    public static void run(int threads, int poolSize, ThrowingRunnable task) throws InterruptedException {
+    public static List<Future<?>>  run(int threads, int poolSize, ThrowingRunnable task) throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
         CountDownLatch done = new CountDownLatch(threads);
+
+        List<Future<?>> futures = new ArrayList<>();
+
         for (int i = 0; i < threads; i++) {
-            executorService.submit(() -> {
+            Future<?> future = executorService.submit(() -> {
                 try {
                     task.run();
                 } catch (Exception e) {
@@ -27,18 +29,22 @@ public final class ConcurrentTestTemplate {
                     done.countDown();
                 }
             });
+            futures.add(future);
         }
         done.await();
         executorService.shutdown();
         if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
             executorService.shutdownNow();
         }
+
+        return futures;
     }
 
     public static void runBurst(int threads, int poolSize, ThrowingRunnable task) throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done  = new CountDownLatch(threads);
+
         for (int i = 0; i < threads; i++) {
             executorService.submit(() -> {
                 try {
@@ -50,6 +56,7 @@ public final class ConcurrentTestTemplate {
                     done.countDown();
                 }
             });
+
         }
         start.countDown();
         done.await();
