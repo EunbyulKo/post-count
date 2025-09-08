@@ -17,15 +17,15 @@ public class CouponService {
     @Transactional
     public long allocateCoupon(Long couponId, String userId) {
 
-        // 티켓할당 히스토리 저장
+        // 잔여 쿠폰 반영
+        long remaining = couponRemainService.decreaseCouponRemain(couponId);
+
+        // 쿠폰 할당 히스토리 저장
         CouponIssueHistory couponIssueHistory = CouponIssueHistory.builder()
                 .couponId(couponId)
                 .userId(userId)
                 .build();
         couponIssueHistoryRepository.save(couponIssueHistory);
-
-        // 티켓잔여 반영
-        long remaining = couponRemainService.decreaseCouponRemain(couponId);
 
         return remaining;
     }
