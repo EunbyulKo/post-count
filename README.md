@@ -24,7 +24,6 @@
 - **PostStat**
   - `post_id`, `view_count`, `like_count`
   - Post와 **1:1**
-  - JPA에서 MapId로 구현
 - **PostLike**
   - `post_id`, `user_id`, `like_yn`
   - **UNIQUE**: (`post_id`, `user_id`)
@@ -38,7 +37,6 @@
 - **CouponRemaing**
   - `coupon_id`, `remaining`
   - Coupon과 **1:1**
-  - JPA에서 외부ID로 구현
 - **CouponIssueHistory**
   - `coupon_id`, `user_id`
   - 쿠폰 발급 내역을 기록 (insert만 진행)
@@ -63,3 +61,31 @@
 - 사용자당 **좋아요 1회**만 가능하도록 변경
 - **PostLike**, **PostView** 테이블 및 관련 로직 추가
 - **PostView** 테이블 대신 **Kafka** 등 이벤트 로그 기반 스트리밍 도입 검토
+
+
+<br/>
+
+---
+
+
+# [참고] JPA 일대일 연관관계 구현 방식
+1. @MapId 사용 (Post와 PostStat)
+
+  ```
+     @Id
+     private Long postId;
+
+     @MapsId
+     @OneToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "post_id")
+     private PostEntity postEntity;
+  ```
+    
+2. 외부ID 사용 (Coupon와 CouponRemaining)
+  
+  ```
+    @Id //@Id만 주고 @GeneratedValue를 사용하지 않고, 외부에서 직접 식별자를 주입하는 방식
+    @Column(name = "coupon_id", nullable = false)
+    private Long couponId;
+  ```
+
