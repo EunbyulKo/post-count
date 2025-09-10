@@ -21,12 +21,15 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
 	implementation ("org.projectlombok:lombok")
 	annotationProcessor ("org.projectlombok:lombok")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("com.h2database:h2")
+	testImplementation("org.testcontainers:testcontainers")
+	testImplementation("org.testcontainers:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
