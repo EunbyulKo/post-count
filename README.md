@@ -9,8 +9,10 @@
 # 도메인
 | 도메인 예시         | 동시성 제어 방식 | 설명                                |
 |---------------------|------------------|-------------------------------------|
-| 조회수, 좋아요 수   | 원자적 연산      | 단순 카운팅은 원자적 증가 연산으로 처리 |
+| 조회수, 좋아요수   | 원자적 연산      | 단순 카운팅은 원자적 증가 연산으로 처리 |
 | 선착순 쿠폰         | 낙관적 락        | `@Version` 버전 충돌을 감지해 처리   |
+| 쿠폰 선물하기        | 비관적 락        | DB 레벨에서 베타적 잠금을 걸어 처리   |
+| 실시간 조회수        | Redis INCR       | Redis의 단일 스레드 이벤트 루프로 요청을 직렬 처리하여 원자적 증가 보장 |
 
 
 <br/>
@@ -41,16 +43,33 @@
   - `coupon_id`, `user_id`
   - 쿠폰 발급 내역을 기록 (insert만 진행)
  
+<br/>
+
+### 3.쿠폰 선물하기
+- **CouponWallet**
+  - `wallet_id`, `user_id`, `coupon_id`, `amount`
+- **CouponTransferHistory**
+  - `transfer_id`, `from_user_id`, `to_user_id`, `coupon_id`, `amount`
+  - 내역을 기록 (insert만 진행)
+
+### 4.실시간 조회수
+- Redis Key : `post:{postId}:views`
 
 <br/>
 
 ---
 
 # 설계 고려사항
-- **PostStat, CouponRemaing 분리 이유**: 경합/부하 분산 및 **통계 집계 편의성** 확보
-- **PostLike / PostView / CouponIssueHistory 생성 의도**: 추후 **일/시간 단위 집계**, **재집계**, **품질 보정**에 활용
-  - 현재는 **동시성 제어 실험**에 집중하여 PostLike / PostView는 **미구현**
-  - **PostView**는 트래픽/데이터 폭증을 대비하여 **다른 방식**도 고려
+- PostStat / CouponRemaing 분리 이유
+  - 경합/부하 분산 및 **통계 집계 편의성** 확보
+ 
+- PostLike / PostView / CouponIssueHistory 생성 의도
+  - 추후 **일/시간 단위 집계**, **재집계**, **품질 보정**에 활용
+
+- 미구현 목록 (동시성 제어 연습에 집중하기 위해)
+  - PostLike / PostView는 미구현
+  - 3.쿠폰 선물하기에서 Domain, Repository 레이어 일부 미구현
+
 
 
 <br/>
@@ -58,9 +77,11 @@
 ---
 
 # 추후 개선
-- 사용자당 **좋아요 1회**만 가능하도록 변경
+- 좋아요수 카운팅에 사용자당 **좋아요 1회**만 가능하도록 변경
 - **PostLike**, **PostView** 테이블 및 관련 로직 추가
 - **PostView** 테이블 대신 **Kafka** 등 이벤트 로그 기반 스트리밍 도입 검토
+
+- 쿠폰 선물하기에 멱등성 보장 로직 추가
 
 
 <br/>
