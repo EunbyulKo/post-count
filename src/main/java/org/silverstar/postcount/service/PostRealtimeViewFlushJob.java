@@ -2,6 +2,7 @@ package org.silverstar.postcount.service;
 
 import lombok.RequiredArgsConstructor;
 import org.silverstar.postcount.service.interfaces.PostStatRepository;
+import org.silverstar.postcount.util.PostKeyProvider;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,14 +23,14 @@ public class PostRealtimeViewFlushJob {
     @Scheduled(fixedDelay = 2000L)
     @Transactional
     public void flush() {
-        Set<String> keys = redis.keys("post:*:views");
+        Set<String> keys = redis.keys(PostKeyProvider.REDIS_PATTERN);
         if (keys.isEmpty()) return;
 
         Map<Long, Long> deltas = new HashMap<>();
         for (String key : keys) {
             Long delta = getAndDelete(key);
             if (delta != null && delta > 0) {
-                Long postId = Long.parseLong(key.split(":")[1]);
+                Long postId = PostKeyProvider.getPostId(key);
                 deltas.merge(postId, delta, Long::sum);
             }
         }

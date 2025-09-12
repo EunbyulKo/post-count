@@ -22,6 +22,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.kafka:spring-kafka")
+	implementation("com.h2database:h2")
 
 	implementation ("org.projectlombok:lombok")
 	annotationProcessor ("org.projectlombok:lombok")
@@ -30,6 +32,11 @@ dependencies {
 	testImplementation("com.h2database:h2")
 	testImplementation("org.testcontainers:testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
+
+	testImplementation("org.springframework.kafka:spring-kafka-test")
+	testImplementation("org.awaitility:awaitility")
+	testImplementation("org.mockito:mockito-junit-jupiter")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
